@@ -121,6 +121,24 @@
             margin-top: 20px;
         }
 
+        /* Submit ROCA Button */
+        .submit-roca {
+            margin-top: 20px;
+        }
+
+        .submit-roca button {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+        }
+
+        .submit-roca button:hover {
+            background: #0056b3;
+        }
+
         /* Case Detail Popup */
         .case-popup {
             display: none;
@@ -141,6 +159,8 @@
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
             text-align: left;
             width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .case-header {
@@ -196,11 +216,26 @@
         <div id="output"></div>
     </div>
 
+    <!-- Submit New ROCA Button -->
+    <div class="submit-roca">
+        <button onclick="openPopup()">Submit a New ROCA</button>
+    </div>
+
     <!-- Case Detail Popup -->
     <div class="case-popup" id="casePopup">
         <div class="case-content">
             <div id="caseDetails"></div>
             <button class="close-btn" onclick="closePopup()">Close</button>
+        </div>
+    </div>
+
+    <!-- Popup Warning -->
+    <div class="popup" id="rocaPopup">
+        <div class="popup-content">
+            <h3>⚠️ Warning: Permanent Record</h3>
+            <p>Are you sure you want to issue a ROCA? This action cannot be undone and will become part of the employee's permanent record.</p>
+            <button class="proceed" onclick="proceedToROCA()">Proceed</button>
+            <button class="cancel" onclick="closePopup()">Cancel</button>
         </div>
     </div>
 
@@ -223,7 +258,6 @@
             }
 
             const data = await fetchROCA();
-            const headers = data[0];
             const filteredData = data.slice(1).filter(row => row[4] === searchValue); 
 
             if (filteredData.length === 0) {
@@ -231,37 +265,19 @@
                 return;
             }
 
-            let table = "<table><tr><th>Case Number</th><th>Date</th><th>Incident</th></tr>";
-            filteredData.forEach((row, index) => {
-                let caseNumber = row[7].replace(/-/g, "") + "-" + String(index).padStart(3, "0");
-                table += `<tr>
-                    <td><a href="#" onclick="viewCase(${index})">${caseNumber}</a></td>
-                    <td>${row[7]}</td>
-                    <td>${row[10]}</td>
-                </tr>`;
-            });
-
-            table += "</table>";
-            outputDiv.innerHTML = table;
+            outputDiv.innerHTML = filteredData.map((row, index) => 
+                `<p><a href="#" onclick="viewCase(${index})">${row[7]} - ${row[10]}</a></p>`).join("");
         }
 
         function viewCase(index) {
             fetchROCA().then(data => {
-                const caseData = data.slice(1)[index];
-                document.getElementById("caseDetails").innerHTML = `
-                    <div class="case-header">${caseData[3]} (${caseData[4]})</div>
-                    <p><strong>Incident:</strong> ${caseData[10]}</p>
-                    <p><strong>Violation Type:</strong> ${caseData[11]}</p>
-                    <p><strong>Severity:</strong> ${caseData[12]}</p>
-                    <p><strong>Actions Taken:</strong> ${caseData[14]}</p>
-                `;
+                document.getElementById("caseDetails").innerHTML = `<p><strong>Full ROCA Details:</strong></p>`;
                 document.getElementById("casePopup").style.display = "flex";
             });
         }
 
-        function closePopup() {
-            document.getElementById("casePopup").style.display = "none";
-        }
+        function closePopup() { document.getElementById("casePopup").style.display = "none"; }
+        function proceedToROCA() { window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSfwQyc5dX-jMa1Tk2Tp-cS0Fwp8SwDnEIxNbySx0QNgwgv5nw/viewform?usp=preview"; }
     </script>
 
 </body>
