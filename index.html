@@ -7,12 +7,13 @@
     <style>
         /* General Styling */
         :root {
-            --primary-color: #007bff;
-            --background-color: #f4f4f4;
+            --primary-color: #007aff;
+            --background-color: #f9f9f9;
             --text-color: #333;
-            --card-background: #ffffff;
-            --table-header: #007bff;
+            --card-background: white;
+            --table-header: #007aff;
             --table-text: white;
+            --border-radius: 12px;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -20,13 +21,13 @@
                 --background-color: #1a1a1a;
                 --text-color: #f0f0f0;
                 --card-background: #252525;
-                --table-header: #0056b3;
+                --table-header: #0a84ff;
                 --table-text: white;
             }
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             text-align: center;
             background-color: var(--background-color);
             color: var(--text-color);
@@ -39,9 +40,21 @@
             margin: auto;
             padding: 20px;
             background: var(--card-background);
-            border-radius: 10px;
+            border-radius: var(--border-radius);
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             margin-top: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+        }
+
+        .header img {
+            width: 120px;
         }
 
         /* Search Box */
@@ -49,6 +62,7 @@
             margin: 20px;
             display: flex;
             justify-content: center;
+            gap: 10px;
         }
 
         input {
@@ -56,7 +70,7 @@
             width: 250px;
             font-size: 16px;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: var(--border-radius);
         }
 
         button {
@@ -66,8 +80,7 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 5px;
-            margin-left: 10px;
+            border-radius: var(--border-radius);
         }
 
         button:hover {
@@ -124,10 +137,21 @@
         .case-content {
             background: var(--card-background);
             padding: 20px;
-            border-radius: 10px;
+            border-radius: var(--border-radius);
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
             text-align: left;
-            width: 400px;
+            width: 500px;
+        }
+
+        .case-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .case-section {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
         }
 
         .close-btn {
@@ -139,23 +163,21 @@
             width: 100%;
             text-align: center;
             margin-top: 10px;
-            border-radius: 5px;
+            border-radius: var(--border-radius);
         }
 
         .close-btn:hover {
             background: #c9302c;
         }
-
-        .case-header {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
 
-    <!-- Title and Subtitle -->
+    <!-- Header -->
+    <div class="header">
+        <img src="https://asset.knovon.net/Knovon_black.png" alt="Knovon Logo">
+    </div>
+
     <h1>ROCA: Record of Corrective Action</h1>
     <h3>A People Relations Tool</h3>
 
@@ -196,15 +218,14 @@
 
             const data = await fetchROCA();
             const headers = data[0];
-            const filteredData = data.slice(1).filter(row => row[4] === searchValue); // Employee ID in column 4
+            const filteredData = data.slice(1).filter(row => row[4] === searchValue); 
 
             if (filteredData.length === 0) {
                 outputDiv.innerHTML = "<p class='no-data'>No ROCA available for given employee.</p>";
                 return;
             }
 
-            let table = "<table><tr><th>Case Number</th><th>Date</th><th>Incident Description</th></tr>";
-
+            let table = "<table><tr><th>Case Number</th><th>Date</th><th>Incident</th></tr>";
             filteredData.forEach((row, index) => {
                 let caseNumber = row[7].replace(/-/g, "") + "-" + String(index).padStart(3, "0");
                 table += `<tr>
@@ -220,12 +241,11 @@
 
         function viewCase(index) {
             fetchROCA().then(data => {
-                const caseData = data.slice(1)[index]; // Get case data
+                const caseData = data.slice(1)[index];
                 document.getElementById("caseDetails").innerHTML = `
                     <div class="case-header">${caseData[2]} (${caseData[3]})</div>
                     <p><strong>Email:</strong> ${caseData[4]}</p>
                     <p><strong>Incident:</strong> ${caseData[10]}</p>
-                    <p><strong>Actions Taken:</strong> ${caseData[14]}</p>
                 `;
                 document.getElementById("casePopup").style.display = "flex";
             });
