@@ -229,16 +229,6 @@
         </div>
     </div>
 
-    <!-- Popup Warning -->
-    <div class="popup" id="rocaPopup">
-        <div class="popup-content">
-            <h3>⚠️ Warning: Permanent Record</h3>
-            <p>Are you sure you want to issue a ROCA? This action cannot be undone and will become part of the employee's permanent record.</p>
-            <button class="proceed" onclick="proceedToROCA()">Proceed</button>
-            <button class="cancel" onclick="closePopup()">Cancel</button>
-        </div>
-    </div>
-
     <script>
         async function fetchROCA() {
             const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRlP3OZqFX3xJ-tSOyfV4R0rZG32WHPh4o6ZB2uFcfFZW5tUIKIXUfvGA0ARX_cjJhovqUvMqSWnSLW/pub?gid=1271202792&single=true&output=csv";
@@ -258,7 +248,7 @@
             }
 
             const data = await fetchROCA();
-            const filteredData = data.slice(1).filter(row => row[4] === searchValue); 
+            const filteredData = data.slice(1).filter(row => row[4] === searchValue);
 
             if (filteredData.length === 0) {
                 outputDiv.innerHTML = "<p class='no-data'>No ROCA available for given employee.</p>";
@@ -271,13 +261,18 @@
 
         function viewCase(index) {
             fetchROCA().then(data => {
-                document.getElementById("caseDetails").innerHTML = `<p><strong>Full ROCA Details:</strong></p>`;
+                const caseData = data.slice(1)[index];
+                document.getElementById("caseDetails").innerHTML = `
+                    <div class="case-header">${caseData[3]} (${caseData[4]})</div>
+                    <p><strong>Incident Description:</strong> ${caseData[10]}</p>
+                    <p><strong>Violation Type:</strong> ${caseData[11]}</p>
+                    <p><strong>Severity Level:</strong> ${caseData[12]}</p>
+                `;
                 document.getElementById("casePopup").style.display = "flex";
             });
         }
 
         function closePopup() { document.getElementById("casePopup").style.display = "none"; }
-        function proceedToROCA() { window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSfwQyc5dX-jMa1Tk2Tp-cS0Fwp8SwDnEIxNbySx0QNgwgv5nw/viewform?usp=preview"; }
     </script>
 
 </body>
