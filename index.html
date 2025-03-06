@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROCA Lookup Portal</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }
+        h2 { color: #333; }
+        .search-container { margin: 20px; }
+        input { padding: 10px; width: 250px; font-size: 16px; }
+        button { padding: 10px; font-size: 16px; cursor: pointer; background-color: #007bff; color: white; border: none; }
+        button:hover { background-color: #0056b3; }
+        table { width: 90%; margin: 20px auto; border-collapse: collapse; background: white; }
+        th, td { border: 1px solid black; padding: 10px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        .no-data { color: green; font-weight: bold; margin-top: 20px; }
+        .container { margin: auto; width: 90%; background: white; padding: 20px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <h2>ROCA Lookup Portal</h2>
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Enter Employee ID">
+            <button onclick="searchROCA()">Search</button>
+        </div>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        async function fetchROCA() {
+            const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRlP3OZqFX3xJ-tSOyfV4R0rZG32WHPh4o6ZB2uFcfFZW5tUIKIXUfvGA0ARX_cjJhovqUvMqSWnSLW/pub?gid=1271202792&single=true&output=csv";
+            const response = await fetch(url);
+            const data = await response.text();
+            return data.split("\n").map(row => row.split(",")); // Convert CSV to array
+        }
+
+        async function searchROCA() {
+            const searchValue = document.getElementById("search").value.trim();
+            const outputDiv = document.getElementById("output");
+            outputDiv.innerHTML = "";
+
+            if (!searchValue) {
+                outputDiv.innerHTML = "<p class='no-data'>Please enter an Employee ID.</p>";
+                return;
+            }
+
+            const data = await fetchROCA();
+            const headers = data[0];
+            const filteredData = data.slice(1).filter(row => row[4] === searchValue); // Assuming Employee ID is in column index 4
+
+            if (filteredData.length === 0) {
+                outputDiv.innerHTML = "<p class='no-data'>No ROCA available for given employee.</p>";
+                return;
+            }
+
+            let table = "<table><tr>";
+            headers.forEach(header => table += `<th>${header}</th>`);
+            table += "</tr>";
+
+            filteredData.forEach(row => {
+                table += "<tr>";
+                row.forEach(cell => table += `<td>${cell}</td>`);
+                table += "</tr>";
+            });
+
+            table += "</table>";
+            outputDiv.innerHTML = table;
+        }
+    </script>
+
+</body>
+</html>
