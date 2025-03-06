@@ -14,7 +14,7 @@
             --table-header: #007bff;
             --table-text: white;
         }
-        
+
         @media (prefers-color-scheme: dark) {
             :root {
                 --background-color: #1a1a1a;
@@ -42,23 +42,6 @@
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             margin-top: 20px;
-        }
-
-        /* Logo */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-        }
-
-        .header img {
-            width: 120px;
-        }
-
-        /* Title Section */
-        h1, h3 {
-            margin: 10px;
         }
 
         /* Search Box */
@@ -109,32 +92,24 @@
             color: var(--table-text);
         }
 
+        td a {
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        td a:hover {
+            text-decoration: underline;
+        }
+
         .no-data {
             color: green;
             font-weight: bold;
             margin-top: 20px;
         }
 
-        /* Submit ROCA Button */
-        .submit-roca {
-            margin-top: 20px;
-        }
-
-        .submit-roca button {
-            background: var(--primary-color);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .submit-roca button:hover {
-            background: #0056b3;
-        }
-
-        /* Popup Styling */
-        .popup {
+        /* Case Detail Popup */
+        .case-popup {
             display: none;
             position: fixed;
             top: 0;
@@ -146,48 +121,39 @@
             align-items: center;
         }
 
-        .popup-content {
+        .case-content {
             background: var(--card-background);
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
-            text-align: center;
-            width: 350px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: left;
+            width: 400px;
         }
 
-        .popup button {
-            margin: 10px;
-            padding: 10px 20px;
+        .close-btn {
+            background: #d9534f;
+            color: white;
             border: none;
+            padding: 10px;
             cursor: pointer;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
             border-radius: 5px;
         }
 
-        .popup .proceed {
-            background: #d9534f;
-            color: white;
-        }
-
-        .popup .cancel {
-            background: #5bc0de;
-            color: white;
-        }
-
-        .popup .proceed:hover {
+        .close-btn:hover {
             background: #c9302c;
         }
 
-        .popup .cancel:hover {
-            background: #31b0d5;
+        .case-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-
-    <!-- Header with Logo -->
-    <div class="header">
-        <img src="https://asset.knovon.net/Knovon_black.png" alt="Knovon Logo">
-    </div>
 
     <!-- Title and Subtitle -->
     <h1>ROCA: Record of Corrective Action</h1>
@@ -202,18 +168,11 @@
         <div id="output"></div>
     </div>
 
-    <!-- Submit New ROCA Button -->
-    <div class="submit-roca">
-        <button onclick="openPopup()">Submit a New ROCA</button>
-    </div>
-
-    <!-- Popup Modal -->
-    <div class="popup" id="rocaPopup">
-        <div class="popup-content">
-            <h3>Are you sure?</h3>
-            <p>Are you sure you want to issue a ROCA? This action cannot be undone.</p>
-            <button class="proceed" onclick="proceedToROCA()">Proceed</button>
-            <button class="cancel" onclick="closePopup()">Cancel</button>
+    <!-- Case Detail Popup -->
+    <div class="case-popup" id="casePopup">
+        <div class="case-content">
+            <div id="caseDetails"></div>
+            <button class="close-btn" onclick="closePopup()">Close</button>
         </div>
     </div>
 
@@ -237,30 +196,44 @@
 
             const data = await fetchROCA();
             const headers = data[0];
-            const filteredData = data.slice(1).filter(row => row[4] === searchValue);
+            const filteredData = data.slice(1).filter(row => row[4] === searchValue); // Employee ID in column 4
 
             if (filteredData.length === 0) {
                 outputDiv.innerHTML = "<p class='no-data'>No ROCA available for given employee.</p>";
                 return;
             }
 
-            let table = "<table><tr>";
-            headers.forEach(header => table += `<th>${header}</th>`);
-            table += "</tr>";
+            let table = "<table><tr><th>Case Number</th><th>Date</th><th>Incident Description</th></tr>";
 
-            filteredData.forEach(row => {
-                table += "<tr>";
-                row.forEach(cell => table += `<td>${cell}</td>`);
-                table += "</tr>";
+            filteredData.forEach((row, index) => {
+                let caseNumber = row[7].replace(/-/g, "") + "-" + String(index).padStart(3, "0");
+                table += `<tr>
+                    <td><a href="#" onclick="viewCase(${index})">${caseNumber}</a></td>
+                    <td>${row[7]}</td>
+                    <td>${row[10]}</td>
+                </tr>`;
             });
 
             table += "</table>";
             outputDiv.innerHTML = table;
         }
 
-        function openPopup() { document.getElementById("rocaPopup").style.display = "flex"; }
-        function closePopup() { document.getElementById("rocaPopup").style.display = "none"; }
-        function proceedToROCA() { window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSfwQyc5dX-jMa1Tk2Tp-cS0Fwp8SwDnEIxNbySx0QNgwgv5nw/viewform?usp=preview"; }
+        function viewCase(index) {
+            fetchROCA().then(data => {
+                const caseData = data.slice(1)[index]; // Get case data
+                document.getElementById("caseDetails").innerHTML = `
+                    <div class="case-header">${caseData[2]} (${caseData[3]})</div>
+                    <p><strong>Email:</strong> ${caseData[4]}</p>
+                    <p><strong>Incident:</strong> ${caseData[10]}</p>
+                    <p><strong>Actions Taken:</strong> ${caseData[14]}</p>
+                `;
+                document.getElementById("casePopup").style.display = "flex";
+            });
+        }
+
+        function closePopup() {
+            document.getElementById("casePopup").style.display = "none";
+        }
     </script>
 
 </body>
