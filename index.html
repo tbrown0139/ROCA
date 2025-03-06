@@ -28,7 +28,6 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            text-align: center;
             background-color: var(--background-color);
             color: var(--text-color);
             margin: 0;
@@ -55,6 +54,26 @@
 
         .header img {
             width: 120px;
+        }
+
+        /* Top Left Submit Button */
+        .submit-roca {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .submit-roca button {
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+        }
+
+        .submit-roca button:hover {
+            background: #0056b3;
         }
 
         /* Search Box */
@@ -105,38 +124,37 @@
             color: var(--table-text);
         }
 
-        td a {
-            color: var(--primary-color);
+        .action-buttons button {
+            margin: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+            border: none;
             cursor: pointer;
-            text-decoration: none;
+            border-radius: var(--border-radius);
         }
 
-        td a:hover {
-            text-decoration: underline;
+        .view-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .view-btn:hover {
+            background: #218838;
+        }
+
+        .contact-btn {
+            background: #ffc107;
+            color: black;
+        }
+
+        .contact-btn:hover {
+            background: #e0a800;
         }
 
         .no-data {
             color: green;
             font-weight: bold;
             margin-top: 20px;
-        }
-
-        /* Submit ROCA Button */
-        .submit-roca {
-            margin-top: 20px;
-        }
-
-        .submit-roca button {
-            background: var(--primary-color);
-            color: white;
-            padding: 12px 20px;
-            border-radius: var(--border-radius);
-            border: none;
-            cursor: pointer;
-        }
-
-        .submit-roca button:hover {
-            background: #0056b3;
         }
 
         /* Case Detail Popup */
@@ -161,13 +179,6 @@
             width: 500px;
             max-height: 80vh;
             overflow-y: auto;
-        }
-
-        .case-header {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-align: center;
         }
 
         .case-section {
@@ -199,6 +210,11 @@
 </head>
 <body>
 
+    <!-- Submit New ROCA Button (Top Left) -->
+    <div class="submit-roca">
+        <button onclick="openPopup()">Submit a New ROCA</button>
+    </div>
+
     <!-- Header -->
     <div class="header">
         <img src="https://asset.knovon.net/Knovon_black.png" alt="Knovon Logo">
@@ -216,11 +232,6 @@
         <div id="output"></div>
     </div>
 
-    <!-- Submit New ROCA Button -->
-    <div class="submit-roca">
-        <button onclick="openPopup()">Submit a New ROCA</button>
-    </div>
-
     <!-- Case Detail Popup -->
     <div class="case-popup" id="casePopup">
         <div class="case-content">
@@ -234,18 +245,13 @@
             const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRlP3OZqFX3xJ-tSOyfV4R0rZG32WHPh4o6ZB2uFcfFZW5tUIKIXUfvGA0ARX_cjJhovqUvMqSWnSLW/pub?gid=1271202792&single=true&output=csv";
             const response = await fetch(url);
             const data = await response.text();
-            return data.split("\n").map(row => row.split(",")); // Convert CSV to array
+            return data.split("\n").map(row => row.split(",")); 
         }
 
         async function searchROCA() {
             const searchValue = document.getElementById("search").value.trim();
             const outputDiv = document.getElementById("output");
             outputDiv.innerHTML = "";
-
-            if (!searchValue) {
-                outputDiv.innerHTML = "<p class='no-data'>Please enter an Employee ID.</p>";
-                return;
-            }
 
             const data = await fetchROCA();
             const filteredData = data.slice(1).filter(row => row[4] === searchValue);
@@ -257,19 +263,6 @@
 
             outputDiv.innerHTML = filteredData.map((row, index) => 
                 `<p><a href="#" onclick="viewCase(${index})">${row[7]} - ${row[10]}</a></p>`).join("");
-        }
-
-        function viewCase(index) {
-            fetchROCA().then(data => {
-                const caseData = data.slice(1)[index];
-                document.getElementById("caseDetails").innerHTML = `
-                    <div class="case-header">${caseData[3]} (${caseData[4]})</div>
-                    <p><strong>Incident Description:</strong> ${caseData[10]}</p>
-                    <p><strong>Violation Type:</strong> ${caseData[11]}</p>
-                    <p><strong>Severity Level:</strong> ${caseData[12]}</p>
-                `;
-                document.getElementById("casePopup").style.display = "flex";
-            });
         }
 
         function closePopup() { document.getElementById("casePopup").style.display = "none"; }
