@@ -3,30 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROCA Lookup Portal</title>
+    <title>ROCA: Record of Corrective Action</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }
-        h2 { color: #333; }
-        .search-container { margin: 20px; }
-        input { padding: 10px; width: 250px; font-size: 16px; }
-        button { padding: 10px; font-size: 16px; cursor: pointer; background-color: #007bff; color: white; border: none; }
-        button:hover { background-color: #0056b3; }
-        table { width: 90%; margin: 20px auto; border-collapse: collapse; background: white; }
-        th, td { border: 1px solid black; padding: 10px; text-align: left; }
-        th { background-color: #007bff; color: white; }
-        .no-data { color: green; font-weight: bold; margin-top: 20px; }
-        .container { margin: auto; width: 90%; background: white; padding: 20px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        /* General Styling */
+        :root {
+            --primary-color: #007bff;
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --card-background: #ffffff;
+            --table-header: #007bff;
+            --table-text: white;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #1a1a1a;
+                --text-color: #f0f0f0;
+                --card-background: #252525;
+                --table-header: #0056b3;
+                --table-text: white;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            background: var(--card-background);
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        /* Logo */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+        }
+
+        .header img {
+            width: 120px;
+        }
+
+        /* Title Section */
+        h1, h3 {
+            margin: 10px;
+        }
+
+        /* Search Box */
+        .search-container {
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        input {
+            padding: 12px;
+            width: 250px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--table-header);
+            color: var(--table-text);
+        }
+
+        .no-data {
+            color: green;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        /* Submit ROCA Button */
+        .submit-roca {
+            margin-top: 20px;
+        }
+
+        .submit-roca button {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .submit-roca button:hover {
+            background: #0056b3;
+        }
+
+        /* Popup Styling */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background: var(--card-background);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 350px;
+        }
+
+        .popup button {
+            margin: 10px;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .popup .proceed {
+            background: #d9534f;
+            color: white;
+        }
+
+        .popup .cancel {
+            background: #5bc0de;
+            color: white;
+        }
+
+        .popup .proceed:hover {
+            background: #c9302c;
+        }
+
+        .popup .cancel:hover {
+            background: #31b0d5;
+        }
     </style>
 </head>
 <body>
 
-    <h2>ROCA Lookup Portal</h2>
+    <!-- Header with Logo -->
+    <div class="header">
+        <img src="https://asset.knovon.net/Knovon_black.png" alt="Knovon Logo">
+    </div>
+
+    <!-- Title and Subtitle -->
+    <h1>ROCA: Record of Corrective Action</h1>
+    <h3>A People Relations Tool</h3>
+
+    <!-- Search Box -->
     <div class="container">
         <div class="search-container">
             <input type="text" id="search" placeholder="Enter Employee ID">
             <button onclick="searchROCA()">Search</button>
         </div>
         <div id="output"></div>
+    </div>
+
+    <!-- Submit New ROCA Button -->
+    <div class="submit-roca">
+        <button onclick="openPopup()">Submit a New ROCA</button>
+    </div>
+
+    <!-- Popup Modal -->
+    <div class="popup" id="rocaPopup">
+        <div class="popup-content">
+            <h3>Are you sure?</h3>
+            <p>Are you sure you want to issue a ROCA? This action cannot be undone.</p>
+            <button class="proceed" onclick="proceedToROCA()">Proceed</button>
+            <button class="cancel" onclick="closePopup()">Cancel</button>
+        </div>
     </div>
 
     <script>
@@ -49,7 +237,7 @@
 
             const data = await fetchROCA();
             const headers = data[0];
-            const filteredData = data.slice(1).filter(row => row[4] === searchValue); // Assuming Employee ID is in column index 4
+            const filteredData = data.slice(1).filter(row => row[4] === searchValue);
 
             if (filteredData.length === 0) {
                 outputDiv.innerHTML = "<p class='no-data'>No ROCA available for given employee.</p>";
@@ -69,6 +257,10 @@
             table += "</table>";
             outputDiv.innerHTML = table;
         }
+
+        function openPopup() { document.getElementById("rocaPopup").style.display = "flex"; }
+        function closePopup() { document.getElementById("rocaPopup").style.display = "none"; }
+        function proceedToROCA() { window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSfwQyc5dX-jMa1Tk2Tp-cS0Fwp8SwDnEIxNbySx0QNgwgv5nw/viewform?usp=preview"; }
     </script>
 
 </body>
